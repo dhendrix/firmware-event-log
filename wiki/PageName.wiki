@@ -6,10 +6,9 @@ Documentation License:
 
 [http://creativecommons.org/licenses/by/3.0/us/ http://i.creativecommons.org/l/by/3.0/us/88x31.png]  [http://creativecommons.org/licenses/by/3.0/us/ Creative Commons Attribution 3.0 United States License]
 
-The goal of this project is to provide a standards-based event log that is suitable for storage in non-volatile memory, such as EEPROM.
+<wiki:toc max_depth="1" />
 
 ==Background==
-
 Modern firmware implementations often reserve a small region in non-volatile memory to store diagnostic and debugging information. However, there is no universal standard for the format. There is no standard location for the log to reside. And there is no standard, free/open-source code to store and retrieve records.
 
 Google's firmware event log format is based off of a well-understood standard format -- SMBIOS System Event Log (Type 15). SMBIOS, however, usually exists strictly in RAM. We require that the event is stored persistently so that information about it can be retrieved at any later point in time, so we have defined methods to store the data in non-volatile memory (assumed to be flash memory).
@@ -58,4 +57,99 @@ struct elog_header {
 };
 }}}
 
-The *elog_magic* field is used to identify the active log area. Since we will be using a two buffer areas, the signature could be at either of two locations. 
+The *elog_magic* field is used to identify the active log area. Since we will be using a two buffer areas, the signature could be at either of two locations.
+
+The *elog_version* field indicates what the layout of the log header is. This document describes the version 1 header.
+
+The *elog_size* field indicates the size of the elog_header, in bytes.
+
+The most significant bit of the *elog_sequence* indicates whether the value is valid or not: if the bit is set (i.e. the sequence number is negative), then the sequence number is not valid. The most significant byte of the sequence number must be the very last byte written when relocating the log, which will ensure that the entire log has been committed to flash before the header is considered valid. In the case of a mid-copy failure, it is possible that two instances of the magic number or even two valid *elog_header* structures could exist in the flash. The larger sequence number determines which header is correct.
+
+The *elog_sequence* plus the number of events in the log yields the total event count. The event count must be essentially monotonic. The only times the event count may move backwards is when the log is cleared, in which case the *elog_sequence* becomes 0, and in the case of a wrap-around.
+
+The following pseudo-code describes the BIOS log-locating algorithm:
+{{{
+elog_header *find_elog() {
+        hdr1 = pointer to log area #1
+        hdr2 = pointer to log area #2
+        final_hdr = NULL
+
+        if (hdr1.elog_magic == "ELOG" && hdr1.eloq_sequence > 0)
+                hdr1_valid = TRUE
+        if (hdr2.elog_magic == "ELOG" && hdr2.eloq_sequence > 0)
+                hdr2_valid = TRUE
+
+        /* if neither area is valid, initialize one of them */
+        if (!hdr1_valid && !hdr2_valid) {
+                reinit_elog_area(hdr1)
+                hdr1_valid = TRUE 
+        }
+
+        if (hdr1_valid && !hdr2_valid) { 
+                final_hdr = hdr1
+                goto check_version
+        }
+        if (hdr2_valid && !hdr1_valid) { 
+                final_hdr = hdr2
+               goto check_version
+        }
+
+        /*
+         * If we get here, they both appear to be valid.  Handling
+         * wrap-around is left as an exercise for the implementer,
+         * though is probably not necessary.
+         */
+        final_hdr = hdr1
+        if (hdr2.elog_sequence > hdr1.elog_sequence) {
+                final_hdr= hdr2
+        }
+check_version:
+        /*
+         * We specifically check this here, rather than earlier to avoid
+         * a potential error case when both logs appear valid, but have
+         * different versions.
+         *
+         * We could check for <= and then adapt old versions, but it's
+         * probably not worth it (yet).
+         */
+        if (final_hdr.elog_version != ELOG_HEADER_VER) {
+                reinit_elog_area(final_hdr)
+        }
+
+        /* make sure the other header invalid */
+        if (final_hdr == hdr1)
+                erase_elog_header(hdr2)
+        if (final_hdr == hdr2)
+                erase_elog_header(hdr1)
+
+        return final_hdr
+}
+}}}
+
+==Events==
+The SMBIOS specification defines the layout of an event structure. Each event consists of a well defined, fixed size structure and an optional variable length data payload. The fixed size portion of an SMBIOS event can be interpreted as a packed structure of the following form:
+{{{
+struct {
+        uint8_t event_id;
+        uint8_t event_size;
+        uint8_t event_year;
+        uint8_t event_month;
+        uint8_t event_day;
+        uint8_t event_hour;
+        uint8_t event_minute;
+        uint8_t event_second;
+        uint8_t event_data[0];
+};
+}}}
+
+The *event_id* field is a value defined in the "Event types" section below.
+
+The *event_size* field defines the total size of the event, including the fixed and variable data portions.
+
+The *event_time[]* field is the timestamp of the event. Each byte is a BCD value. The six bytes represent year, month, day, hour, minute, second.
+
+The *event_data[]* field is the variable length data payload. The contents of this field are detailed in the "Event payloads" section below. Every event has at least 1 byte of payload. The final (or only) byte of payload is used as a sum-to-zero byte. All valid events will have a byte checksum of zero. There is still a small chance that a corrupted event, including corrupted data could sum to zero, but this is probably negligible. If we want to be even more bulletproof, we could make the checksum be 2 bytes. If the 1 byte sum is < 0xff, the second checksum byte is 0. If the 1 byte sum is exactly 0xff, then the first checksum byte is 0xfe and the second checksum byte is 1. This is probably not worth the complexity or storage cost of 1 byte per event.
+
+==Event types==
+
+The SMBIOS specification defines several standard types and leaves room for OEM defined types. Below is the list of SMBIOS standard events:
