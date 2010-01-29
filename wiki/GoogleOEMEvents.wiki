@@ -8,7 +8,7 @@ Documentation License:
 Within the OEM-specific namespace (0x80-0xFE) of the SMBIOS event log types, we define the following events. Any value within this namespace which does not have an event assigned is reserved for future assignment.
 
 || *Event ID* || *Meaning* ||
-|| 0x80 || OS-generated Boot Log data ||
+|| 0x80 || OS-generated Event Log data ||
 || 0x81 || Crisis mode activated ||
 || 0x82 || NVRAM reset ||
 || 0x83 || Real-time clock reset ||
