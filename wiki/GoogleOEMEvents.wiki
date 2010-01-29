@@ -30,14 +30,13 @@ Within the OEM-specific namespace (0x80-0xFE) of the SMBIOS event log types, we 
 }}}
 
 The `reason` field indicates the kernel shutdown/reset reason.  Known values are:
-   * 0x01 - Clean reset/boot
-   * 0x02 - NMI watchdog event caused the kernel reset
-   * 0x03 - OS panic
-   * 0x04 - OS issues oops
-   * 0x05 - OS die
-   * 0x06 - OS software watchdog timeout
-   * 0x07 - Multi bit ECC error
-   * 0x08 - Triple fault
+   * 0x01 - NMI watchdog event caused the kernel reset
+   * 0x02 - OS panic
+   * 0x03 - OS issues oops
+   * 0x04 - OS die
+   * 0x05 - OS software watchdog timeout
+   * 0x06 - Multi bit ECC error
+   * 0x07 - Triple fault
 
 The `bootnum` field contains the sequential boot number of the boot being logged. 
 
