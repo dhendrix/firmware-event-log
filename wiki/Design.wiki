@@ -189,7 +189,7 @@ The SMBIOS specification defines several standard types and leaves room for OEM 
 The SMBIOS specification allows for a variable-length data payload on each event.  This section details the payload for each event.  If an event is not detailed here, there is no data payload other than the checksum.  All payloads are assumed to be packed structures.
 
 ====Event 0x01 - Single bit ECC memory error====
-This event indicates that a single bit ECC (SBE) memory error had occurred. The event payload =dimm_number= indicates the DIMM that failed.
+This event indicates that a single bit ECC (SBE) memory error had occurred. The event payload `dimm_number` indicates the DIMM that failed.
 
 {{{
 struct {
@@ -219,8 +219,8 @@ struct {
 }}}
 
 ====Event 0x04 - Bus timeout====
-This event indicates that a bus timeout had occurred while accessing a bus.  The payload =which= field indicates the type of the bus such as PCI,
-I2C etc.  The =sub_type= field refers to the instance of the bus (say AMB I2C etc).
+This event indicates that a bus timeout had occurred while accessing a bus.  The payload `which` field indicates the type of the bus such as PCI,
+I2C etc.  The `sub_type` field refers to the instance of the bus (say AMB I2C etc).
 
 {{{
 struct {
@@ -231,11 +231,11 @@ struct {
 }}}
 
 ====Event 0x05 - IO channel check====
-This event indicates that an error had occurred in an I/O channel in the system.  The payload =which= field indicates type of the error as follows:
+This event indicates that an error had occurred in an I/O channel in the system.  The payload `which` field indicates type of the error as follows:
    * 0x0001 - Syncflood
    * 0x0002 - CRC error
   
-The =device= field contains the PCI function address (PFA) of the device reporting the error.  The PFA is encoded as:
+The `device` field contains the PCI function address (PFA) of the device reporting the error.  The PFA is encoded as:
    * bits [15:8] - PCI bus number
    * bits [7:3]  - PCI device number
    * bits [2-0]  - PCI function number
@@ -280,7 +280,7 @@ struct {
 
 ====Event 0x09 - PCI PERR====
 ====Event 0x0A - PCI SERR====
-These events indicates that PCI PERR/SERR had occurred and lists the device address in =device= field of the payload.
+These events indicates that PCI PERR/SERR had occurred and lists the device address in `device` field of the payload.
 
 {{{
 struct {
@@ -290,7 +290,7 @@ struct {
 }}}
 
 ====Event 0x0B - CPU failure====
-This event indicates that a CPU failure had occurred.  The nature of the error is indicated in =sub_type= field as follows:
+This event indicates that a CPU failure had occurred.  The nature of the error is indicated in `sub_type` field as follows:
    * 0x01 - CPU mismatch
    * 0x02 - CPU IERR# assertion
    * 0x03 - CPU BINIT# assertion
@@ -331,7 +331,7 @@ struct {
 };
 }}}
 
-The =event_type= field indicates which type of logs are disabled. This event occurs when a particular event happens too frequently and the logger decided to stop logging it to avoid event log full condition (all events are of same type!).
+The `event_type` field indicates which type of logs are disabled. This event occurs when a particular event happens too frequently and the logger decided to stop logging it to avoid event log full condition (all events are of same type!).
 
 ====Event 0x10 - System limit exceeded====
 {{{
