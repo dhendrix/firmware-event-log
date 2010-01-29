@@ -14,7 +14,7 @@ Modern firmware implementations often reserve a small region in non-volatile mem
 
 Google's firmware event log format is based off of a well-understood standard format -- SMBIOS System Event Log (Type 15). SMBIOS, however, usually exists strictly in RAM. We require that the event is stored persistently so that information about it can be retrieved at any later point in time, so methods have been defined to store the data in non-volatile memory (assumed to be flash memory).
 
-This event log will store information about events critical to system operation. Such events include DRAM errors, bus failures, and arbitrary OEM-defined events such as basic kernel crash information and crisis recovery notification. The events which are logged are implementation-specific.
+This event log will store information about events critical to system operation. Such events include DRAM errors, bus failures, and arbitrary OEM-defined events such as basic kernel crash information and crisis recovery notification. The events which are logged are implementation-specific; that is, a given implementation might not actually recognize or commit log entries for every event.
 
 ==Terminology==
 
