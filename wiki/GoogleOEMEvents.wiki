@@ -23,7 +23,7 @@ Within the OEM-specific namespace (0x80-0xFE) of the SMBIOS event log types, we 
     };
 }}}
 
-The _reason_ field indicates the kernel shutdown/reset reason.  Known values are:
+The `reason` field indicates the kernel shutdown/reset reason.  Known values are:
    * 0x01 - Clean reset/boot
    * 0x02 - NMI watchdog event caused the kernel reset
    * 0x03 - OS panic
@@ -33,7 +33,7 @@ The _reason_ field indicates the kernel shutdown/reset reason.  Known values are
    * 0x07 - Multi bit ECC error
    * 0x08 - Triple fault
 
-The _bootnum_ field contains the sequential boot number of the boot being logged. 
+The `bootnum` field contains the sequential boot number of the boot being logged. 
 
 ====Event 0x81 - Crisis mode activated====
 {{{
@@ -44,7 +44,7 @@ The _bootnum_ field contains the sequential boot number of the boot being logged
     };
 }}}
 
-The _reason_ field indicates the crisis mode activation reason.  Known values are:
+The `reason` field indicates the crisis mode activation reason.  Known values are:
    * 0x00 - Unknown
    * 0x01 - Activated by user with hardware (e.g. hardware switch or button)
    * 0x02 - Activated by user in software (e.g. selected thru BIOS configuration)
@@ -103,14 +103,13 @@ This event indicates that emergency thermal protection was triggered in the syst
      };
 }}}
 
-=type= field indicates the type of device that triggered thermal protection as follows:
-%TABLE{valign="top" cellpadding="5" cellspacing="0" tablerules="all" tableborder="0" sort="off" headeralign="left"}%
-| *Type* | *Meaning* |
-| 0x00 | Chipset |
-| 0x01 | CPU |
-| 0x02 | Unknown |
+`type` field indicates the type of device that triggered thermal protection as follows:
+|| *Type* || *Meaning* ||
+|| 0x00 || Chipset ||
+|| 0x01 || CPU ||
+|| 0x02 || Unknown ||
 
-=sourceid= field provides an index for the device (e.g. CPU package number).
+`sourceid` field provides an index for the device (e.g. CPU package number).
 
 ====Event 0x87 - Dimm Error Info====
 This event displays extended DIMM error information.  This event provides more information (if available) on DIMM errors such as training failure, membist failure etc.  This information is chipset/board specific. The payload of this error is defined as follows:
@@ -124,7 +123,7 @@ This event displays extended DIMM error information.  This event provides more i
     };
 }}}
 
-The _error_type_ field indicates the the type of the error. The following table lists the defined errors:
+The `error_type` field indicates the the type of the error. The following table lists the defined errors:
 || *Type* | *Meaning* ||
 || 0x00 || Unknown ||
 || 0x01 || Training Failure ||
