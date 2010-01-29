@@ -2,9 +2,10 @@
 
 Based off work by Tim Hockin @ Google, Inc, 2006
 
+
 Documentation License:
 
-[http://creativecommons.org/licenses/by/3.0/us/ http://i.creativecommons.org/l/by/3.0/us/88x31.png]  [http://creativecommons.org/licenses/by/3.0/us/ Creative Commons Attribution 3.0 United States License]
+[http://creativecommons.org/ http://i.creativecommons.org/l/by/3.0/us/88x31.png]  [http://creativecommons.org/licenses/by/3.0/us/ Creative Commons Attribution 3.0 United States License]
 
 <wiki:toc max_depth="1" />
 
@@ -207,7 +208,7 @@ struct {
 };
 }}}
 
-=Event 0x03 - Memory parity error====
+====Event 0x03 - Memory parity error====
 This event indicates that a memory parity error had occurred. The event payload is same as in Event 0x01.
 
 {{{
