@@ -152,4 +152,295 @@ The *event_data[]* field is the variable length data payload. The contents of th
 
 ==Event types==
 
-The SMBIOS specification defines several standard types and leaves room for OEM defined types. Below is the list of SMBIOS standard events:
+The SMBIOS specification defines several standard types and leaves room for OEM defined types. Below is the list of SMBIOS standard events (As of version 2.6 of the spec):
+
+|| *Event ID* || *Meaning* ||
+|| 0x00 || Reserved ||
+|| 0x01 || Single-bit ECC error ||
+|| 0x02 || Multi-bit ECC error ||
+|| 0x03 || Memory parity error ||
+|| 0x04 || Bus timeout ||
+|| 0x05 || IO channel check ||
+|| 0x06 || Software NMI ||
+|| 0x07 || POST memory resize ||
+|| 0x08 || POST error ||
+|| 0x09 || PCI parity error ||
+|| 0x0A || PCI system error ||
+|| 0x0B || CPU failure ||
+|| 0x0C || EISA FailSafe Timer timeout ||
+|| 0x0D || Correctable memory log disabled ||
+|| 0x0E || Specific event type log disabled ||
+|| 0x10 || System limit exceeded (e.g. temperature) ||
+|| 0x11 || Async HW timer (WDT) timeout ||
+|| 0x12 || System configuration information ||
+|| 0x13 || Hard disk information ||
+|| 0x14 || System reconfigured ||
+|| 0x15 || Uncorrectable CPU-complex error ||
+|| 0x16 || Log area reset/cleared ||
+|| 0x17 || System boot ||
+|| 0x80-0xFE || OEM-specific events ||
+|| 0xFF || End of log ||
+
+
+
+===EventPayloads===
+
+The SMBIOS specification allows for a variable-length data payload on each event.  This section details the payload for each event.  If an event is not detailed here, there is no data payload other than the checksum.  All payloads are assumed to be packed structures.
+
+====Event 0x01 - Single bit ECC memory error====
+This event indicates that a single bit ECC (SBE) memory error had occurred. The event payload =dimm_number= indicates the DIMM that failed.
+
+{{{
+struct {
+    uint8_t  dimm_number; // Failed dimm number
+    uint8_t  checksum;
+};
+}}}
+
+====Event 0x02 - Multi bit ECC memory error====
+This event indicates that a multi-bit ECC (MBE) memory error had occurred. The event payload is same as in Event 0x01.
+
+{{{
+struct {
+    uint8_t  dimm_number; // Failed dimm number
+    uint8_t  checksum;
+};
+}}}
+
+=Event 0x03 - Memory parity error====
+This event indicates that a memory parity error had occurred. The event payload is same as in Event 0x01.
+
+{{{
+struct {
+    uint8_t  dimm_number; // Failed dimm number
+    uint8_t  checksum;
+};
+}}}
+
+====Event 0x04 - Bus timeout====
+This event indicates that a bus timeout had occurred while accessing a bus.  The payload =which= field indicates the type of the bus such as PCI,
+I2C etc.  The =sub_type= field refers to the instance of the bus (say AMB I2C etc).
+
+{{{
+struct {
+    uint8_t  which;
+    uint16_t sub_type;
+    uint8_t  checksum;
+};
+}}}
+
+====Event 0x05 - IO channel check====
+This event indicates that an error had occurred in an I/O channel in the system.  The payload =which= field indicates type of the error as follows:
+   * 0x0001 - Syncflood
+   * 0x0002 - CRC error
+  
+The =device= field contains the PCI function address (PFA) of the device reporting the error.  The PFA is encoded as:
+   * bits [15:8] - PCI bus number
+   * bits [7:3]  - PCI device number
+   * bits [2-0]  - PCI function number
+
+{{{
+struct {
+    uint8_t  which;
+    uint16_t device;
+    uint8_t  checksum;
+};
+}}}
+
+====Event 0x06 - S/W NMI====
+This payload-less event indicates that a S/W NMI had occurred. 
+
+{{{
+struct {
+    uint8_t  checksum;
+};
+}}}
+
+*Note*: All events contains checksum as standard payload
+
+====Event 0x07 - POST memory resize====
+This event indicates that memory resizing had occurred during the firmware POST.  There is no payload associated with this event except checksum.
+
+{{{
+struct {
+    uint8_t  checksum;
+};
+}}}
+
+====Event 0x08 - POST error event====
+This event lists the POST errors occurred during the boot process and reports them in a bit pattern defined in SMBIOS specification.
+
+{{{
+struct {
+    uint32_t post_error_map; // POST error bit map
+    uint8_t  checksum;
+};
+}}}
+
+====Event 0x09 - PCI PERR====
+====Event 0x0A - PCI SERR====
+These events indicates that PCI PERR/SERR had occurred and lists the device address in =device= field of the payload.
+
+{{{
+struct {
+    uint16_t device;
+    uint8_t  checksum;
+};
+}}}
+
+====Event 0x0B - CPU failure====
+This event indicates that a CPU failure had occurred.  The nature of the error is indicated in =sub_type= field as follows:
+   * 0x01 - CPU mismatch
+   * 0x02 - CPU IERR# assertion
+   * 0x03 - CPU BINIT# assertion
+
+The `cpu_number` field identifies the CPU that caused the failure.
+
+{{{
+struct {
+    uint8_t  sub_type;
+    uint16_t cpu_number;
+    uint8_t  checksum;
+};
+}}}
+
+====Event 0x0C - EISA timeout====
+This event indicates a timeout had occurred in the EISA bus. This event does not have any payload other than checksum.
+
+{{{
+struct {
+    uint8_t  checksum;
+};
+}}}
+
+====Event 0x0D - Correctable memory log disabled====
+This event indicates that the logging of correctable memory errors had been disabled. This event does not have any payload other than checksum.
+
+{{{
+struct {
+    uint8_t  checksum;
+};
+}}}
+
+====Event 0x0E - Log disabled====
+{{{
+struct {
+    uint8_t  event_type;
+    uint8_t  checksum;
+};
+}}}
+
+The =event_type= field indicates which type of logs are disabled. This event occurs when a particular event happens too frequently and the logger decided to stop logging it to avoid event log full condition (all events are of same type!).
+
+====Event 0x10 - System limit exceeded====
+{{{
+struct {
+    uint8_t  which;
+    uint8_t  checksum;
+};
+}}}
+
+The `which` field points to the parameter that exceeded the system limit.  The values for this field are not defined.
+
+====Event 0x11 - Async HW timer (WDT) timeout====
+{{{
+struct {
+    uint8_t  timer;
+    uint8_t  checksum;
+};
+}}}
+
+The timer field indicates which watchdog timer indicated a timeout.  Known values for this field are:
+   * 0x0001 - TCO watchdog
+   * 0x0002 - .Net watchdog
+
+====Event 0x12 - System configuration information====
+====Event 0x13 - HDD information====
+No payload format is defined for these events.
+
+====Event 0x14 - System reconfigured====
+{{{
+struct {
+    uint8_t  which;
+    uint8_t  checksum;
+};
+}}}
+
+The which field indicates which aspect of the system was reconfigured.  Known values for this field are:
+   * 0x0001 - DIMMs reconfigured
+
+====Event 0x15 - Uncorrectable CPU-complex error====
+{{{
+struct {
+    uint8_t  subtype;
+    uint16_t cpu_number;
+    uint8_t  checksum;
+};
+}}}
+
+The `subtype` field indicates type of the CPU error.  `cpu_number` identifies the CPU that generated the error.
+
+====Event 0x16 - Log area reset/cleared====
+{{{
+struct {
+    uint16_t bytes;
+    uint32_t boot_num;
+    uint8_t  checksum;
+};
+}}}
+
+The bytes field indicates how many bytes of the log area were discarded. 
+
+*NOTE*: Since the number of bytes cleared cannot be 0, the count field is 0-based. That is, the value of 0 indicates 1 byte is cleared. This way we can indicate values from 1 to 64K (0xFFFF). Also it is decided not to increase the size of _bytes_ field from _uint16_t_ to _uint32_t_ because the current elog size can be only 64K.
+
+====Event 0x17 - System boot====
+{{{
+struct {
+    uint32_t bootnum;
+    uint8_t  checksum;
+};
+}}}
+
+The `bootnum` field contains the sequential boot number of the boot being logged.  This will always be the first event logged during boot up.
+
+==Log shrinking==
+
+Because the SMBIOS specification does not provide ring-buffer semantics, we want to avoid the "log full" scenario if at all possible.  When writing new events to the log, we must ensure that there is space available for the new event.  If there is not space available, then the log must be shrunk and re-written. 
+
+Because flash bits are only programmable from '1' to '0', it is effectively a write-once medium, with sector erases required in order to re-write.  Flash chips have a variety of erasable sector sizes.  Because we have multiple parts, we must be ready to handle the worst case - 64 KB erasable areas.  That means that you can only erase the device 64 KB at a time.  There is no way to erase less than that (on at least some flash chips).  When we need to shrink the log, we need to avoid any time window where the log is not present on the flash chip.  To do this, we will use a double-buffered copy operation.  When we near capacity on one 64 KB log, we will copy a portion of the log to a second flash block, and then indicate that the second block is valid.  Only after the new log is committed to the flash medium can we erase the old log.  This should provide a reliable way of shrinking the log without risking a corrupted or missing log.
+
+Shrinking the log will not be a fast operation.  We want to avoid doing the log shrink at run-time if at all possible.  To do this, we will evaluate the fullness of the log at bootup time.  If the log is found to have crossed the "fullness threshold" (defined below), we can do a log shrink immediately, which will hopefully reduce the need to do log shrinks when logging events.  This does not eliminate the need to check for space when logging an event, but should reduce the likelihood of not finding space.
+
+To shrink the log, we scan forward from the start of the log until we cross the shrink threshold.  Because we only want to discard whole events, we might discard slightly more than the nominal shrink size. We can then copy the remainder of the log to the new location.  The following pseudo-code describes the BIOS log-shrinking algorithm in more detail:
+
+{{{
+elog_header *shrink_elog(elog_header *src_hdr) {
+        if (src_hdr == log area #1) {
+                dst_hdr = log area #2
+        } else {
+                dst_hdr = log_area #1
+        }
+
+        src_offset = 0
+        nevents_dropped = 0
+        while (src_offset < ELOG_SHRINK_SIZE) {
+                src_offset += event_size(src_hdr.elog_data + src_offset)
+                nevents_dropped++
+        }
+        log_size -= src_offset
+
+        erase_flash(dst_hdr)
+        copy_flash(dst_hdr.elog_data, src_hdr.elog_data + src_offset, log_size)
+        copy_header(dst_hdr, src_hdr) /* not the sequence # */
+        log_event(dst_hdr, partial clear)
+        write_sequence_number(dst_hdr, src_hdr.elog_sequence + nevents_dropped)
+        erase_elog_header(src_hdr)
+}
+
+The following constants are examples for a flash part with sector size of 64KB:
+    /*
+     * The SMBIOS spec defines the log area size (including header) as a 16 bit field.
+     */
+    #define ELOG_TOTAL_SIZE       0xffff
+    #define ELOG_SHRINK_SIZE      0x4000
+    #define ELOG_FULL_THRESHOLD   0xf000
