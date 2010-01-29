@@ -1,6 +1,6 @@
 #summary Google OEM-defined Events
 
-Google OEM-specific events
+Google OEM-defined events
 Version 0.1
 
 Documentation License:
