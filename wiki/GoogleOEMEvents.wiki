@@ -1,6 +1,10 @@
 Google OEM-specific events
 Version 0.1
 
+Documentation License:
+
+[http://creativecommons.org/ http://i.creativecommons.org/l/by/3.0/us/88x31.png]  [http://creativecommons.org/licenses/by/3.0/us/ Creative Commons Attribution 3.0 United States License]
+
 Within the OEM-specific namespace (0x80-0xFE) of the SMBIOS event log types, we define the following events. Any value within this namespace which does not have an event assigned is reserved for future assignment.
 
 || *Event ID* || *Meaning* ||
