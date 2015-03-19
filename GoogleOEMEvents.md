@@ -1,0 +1,139 @@
+Google OEM-defined events
+Version 0.1
+
+Documentation License:
+
+[![](http://i.creativecommons.org/l/by/3.0/us/88x31.png)](http://creativecommons.org/)  [Creative Commons Attribution 3.0 United States License](http://creativecommons.org/licenses/by/3.0/us/)
+
+Within the OEM-specific namespace (0x80-0xFE) of the SMBIOS event log types, we define the following events. Any value within this namespace which does not have an event assigned is reserved for future assignment.
+
+| **Event ID** | **Meaning** |
+|:-------------|:------------|
+| 0x80 | OS-generated Event Log data |
+| 0x81 | Crisis mode activated |
+| 0x82 | NVRAM reset |
+| 0x83 | Real-time clock reset |
+| 0x84 | TCO watchdog timer reset |
+| 0x85 | No boot media found |
+| 0x86 | Thermtrip |
+| 0x87 | Dimm Error Info |
+
+
+#### Event 0x80 - OS-generated Event Log data ####
+```
+    struct {
+        uint8_t  reason;
+        uint32_t bootnum;
+        uint8_t  checksum;
+    };
+```
+
+The `reason` field indicates the kernel shutdown/reset reason.  Known values are:
+  * 0x01 - NMI watchdog event caused the kernel reset
+  * 0x02 - OS panic
+  * 0x03 - OS issues oops
+  * 0x04 - OS die
+  * 0x05 - OS software watchdog timeout
+  * 0x06 - Multi bit ECC error
+  * 0x07 - Triple fault
+
+The `bootnum` field contains the sequential boot number of the boot being logged.
+
+#### Event 0x81 - Crisis mode activated ####
+```
+    struct {
+        uint8_t  reason;
+        uint32_t bootnum;
+        uint8_t  checksum;
+    };
+```
+
+The `reason` field indicates the crisis mode activation reason.  Known values are:
+  * 0x00 - Unknown
+  * 0x01 - Activated by user with hardware (e.g. hardware switch or button)
+  * 0x02 - Activated by user in software (e.g. selected thru BIOS configuration)
+  * 0x03 - Firmware corruption detected
+  * 0x04 - Boot target (bootloader or OS kernel) payload corruption detected
+
+#### Event 0x82 - Nvram cleared ####
+This OEM event indicates that firmware nvram is cleared.
+
+```
+    struct {
+        uint32_t bootnum;
+        uint8_t  checksum;
+    };
+```
+
+#### Event 0x83 - RTC reset happened ####
+This OEM event indicates that a RTC reset had occurred
+
+```
+    struct {
+        uint32_t bootnum;
+        uint8_t  checksum;
+    };
+```
+
+#### Event 0x84 - TCO watchdog timer reset ####
+This OEM event indicates that a TCO watchdog timer reset had occurred.
+
+```
+    struct {
+        uint32_t bootnum;
+        uint8_t  checksum;
+    };
+```
+
+#### Event 0x85 - No boot media found ####
+This OEM event indicates that firmware fails to find a boot media such as PXE boot, USB boot device or HDD boot device. No payload is associated with this event except checksum.
+
+```
+    struct {
+        uint32_t bootnum;
+        uint8_t  checksum;
+    };
+```
+
+#### Event 0x86 - Thermtrip ####
+This event indicates that emergency thermal protection was triggered in the system.
+
+```
+    struct {
+        uint8_t type;
+        uint16_t sourceid;
+        uint32_t bootnum;
+        uint8_t checksum;
+     };
+```
+
+`type` field indicates the type of device that triggered thermal protection as follows:
+| **Type** | **Meaning** |
+|:---------|:------------|
+| 0x00 | Chipset |
+| 0x01 | CPU |
+| 0x02 | Unknown |
+
+`sourceid` field provides an index for the device (e.g. CPU package number).
+
+#### Event 0x87 - Dimm Error Info ####
+This event displays extended DIMM error information.  This event provides more information (if available) on DIMM errors such as training failure, membist failure etc.  This information is chipset/board specific. The payload of this error is defined as follows:
+
+```
+    struct {
+        uint32_t dimmmap;
+        uint8_t error_type;
+        uint32_t bootnum;
+        uint8_t  checksum;
+    };
+```
+
+The `error_type` field indicates the the type of the error. The following table lists the defined errors:
+| **Type** | **Meaning** |
+|:-----------------------|
+| 0x00 | Unknown |
+| 0x01 | Training Failure |
+| 0x02 | Coarse Delay Failure |
+| 0x03 | memBIST Failed |
+| 0x04 | Soft memtest Failed |
+| 0x05 | Misc memory Failure |
